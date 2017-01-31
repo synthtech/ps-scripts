@@ -4,7 +4,9 @@ $vs = "C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\vcvarsall.bat"
 # Location of msbuild (for compiling Taiga)
 $msbuild = "C:\Program Files (x86)\MSBuild\14.0\Bin\MSBuild.exe"
 # Location of Taiga source code
-$taiga = "$env:USERPROFILE\Documents\Git\taiga"
+$source = "$env:USERPROFILE\Documents\Git\taiga"
+# Location of Taiga installation
+$install = "$env:APPDATA\Taiga"
 
 $dir = $PSScriptRoot
 
@@ -13,7 +15,7 @@ $quickBuild = read-host "[Script] Quick build?"
 if ($quickBuild -eq "yes" -or $quickBuild -eq "y") {
     $release = "release"
     $build = "build"
-    $openBuild = "yes"
+    $copyBuild = "yes"
 }
 
 if (!($release)) {
@@ -45,7 +47,7 @@ if (!($build)) {
 }
 
 # Compiling libcurl
-cd $taiga\deps\src\curl\winbuild
+cd $source\deps\src\curl\winbuild
 Invoke-BatchFile $vs
 
 if ($build -eq "rebuild") {
@@ -57,22 +59,22 @@ if ($release -eq "debug") { nmake /f Makefile.vc mode=static RTLIBCFG=static VC=
 else { nmake /f Makefile.vc mode=static RTLIBCFG=static VC=14 }
 write-output "`n[Script] Build finished."
 write-output "[Script] Copying $release library..."
-robocopy /s /is ..\builds\libcurl-vc14-x86-$release-static-ipv6-sspi-winssl\lib $taiga\deps\lib
+robocopy /s /is ..\builds\libcurl-vc14-x86-$release-static-ipv6-sspi-winssl\lib $source\deps\lib
 write-output "[Script] Copy complete.`n"
 
 cd $dir
 
 # Compiling Taiga
 write-output "[Script] Building Taiga...`n"
-if ($msbuild) { & $msbuild $taiga\project\vs2015\Taiga.vcxproj /t:$build /p:Configuration=$release }
-else { msbuild $taiga\project\vs2015\Taiga.vcxproj /t:$build /p:Configuration=$release }
+if ($msbuild) { & $msbuild $source\project\vs2015\Taiga.vcxproj /t:$build /p:Configuration=$release }
+else { msbuild $source\project\vs2015\Taiga.vcxproj /t:$build /p:Configuration=$release }
 write-output "`n[Script] Build finished."
 
-if (!($openBuild)) {
-    $openBuild = read-host "[Script] Would you like to open the builds folder?"
+if (!($copyBuild)) {
+    $copyBuild = read-host "[Script] Would you like to copy the build to your Taiga folder?"
 }
-if ($openBuild -eq "yes" -or $openBuild -eq "y") {
-    Invoke-Item $taiga\bin\$release
+if ($copyBuild -eq "yes" -or $copyBuild -eq "y") {
+    Copy-Item $source\bin\$release\Taiga.exe -destination $install
 }
 
 read-host -prompt "`n[Script] Press enter to exit"
