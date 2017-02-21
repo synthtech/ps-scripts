@@ -1,3 +1,3 @@
-# taiga-build
+# ps-scripts
 
-A Powershell build script for [Taiga](https://github.com/erengy/taiga).
+Some Powershell scripts.
