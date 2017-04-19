@@ -1,6 +1,6 @@
 
-# Location of VsDevCmd.bat (for compiling libcurl)
-$vs = "C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\Common7\Tools\VsDevCmd.bat"
+# Location of vcvars32.bat (for compiling libcurl)
+$vs = "C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Auxiliary\Build\vcvars32.bat"
 # Location of MsBuild (for compiling Taiga)
 $msbuild = "C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\MSBuild\15.0\Bin\MSBuild.exe"
 # Location of Taiga source code
@@ -55,8 +55,8 @@ if ($build -eq "rebuild") {
 }
 
 write-output "[Script] Building libcurl ($release)..."
-if ($release -eq "debug") { nmake /f Makefile.vc mode=static RTLIBCFG=static VC=15 DEBUG=yes }
-else { nmake /f Makefile.vc mode=static RTLIBCFG=static VC=15 }
+if ($release -eq "debug") { nmake /f Makefile.vc mode=static RTLIBCFG=static VC=15 MACHINE=x86 DEBUG=yes }
+else { nmake /f Makefile.vc mode=static RTLIBCFG=static MACHINE=x86 VC=15 }
 write-output "`n[Script] Build finished."
 write-output "[Script] Copying $release library..."
 robocopy /s /is ..\builds\libcurl-vc15-x86-$release-static-ipv6-sspi-winssl\lib $source\deps\lib
