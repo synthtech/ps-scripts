@@ -1,12 +1,13 @@
-
 # Location of vcvars32.bat (for compiling libcurl)
-$vs = "C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Auxiliary\Build\vcvars32.bat"
+$vs = "${env:PROGRAMFILES(X86)}\Microsoft Visual Studio\2017\Community\VC\Auxiliary\Build\vcvars32.bat"
 # Location of MsBuild (for compiling Taiga)
-$msbuild = "C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\MSBuild\15.0\Bin\MSBuild.exe"
+$msbuild = "${env:PROGRAMFILES(X86)}\Microsoft Visual Studio\2017\Community\MSBuild\15.0\Bin\MSBuild.exe"
 # Location of Taiga source code
 $source = "$env:USERPROFILE\Documents\Git\taiga"
 # Location of Taiga installation
 $install = "$env:APPDATA\Taiga"
+# Windows version
+$platform = "10.0.16299.0"
 
 $dir = $PSScriptRoot
 
@@ -49,6 +50,7 @@ if (!($build)) {
 # Compiling libcurl
 cd $source\deps\src\curl\winbuild
 Invoke-BatchFile $vs
+Invoke-BatchFile $source\deps\src\curl\buildconf.bat
 
 if ($build -eq "rebuild") {
     Remove-Item -Recurse -Force ..\builds
@@ -66,8 +68,8 @@ cd $dir
 
 # Compiling Taiga
 write-output "[Script] Building Taiga...`n"
-if ($msbuild) { & $msbuild $source\project\vs2017\Taiga.vcxproj /t:$build /p:Configuration=$release }
-else { msbuild $source\project\vs2017\Taiga.vcxproj /t:$build /p:Configuration=$release }
+if ($msbuild) { & $msbuild $source\project\vs2017\Taiga.vcxproj /t:$build /p:Configuration=$release /p:WindowsTargetPlatformVersion=$platform }
+else { msbuild $source\project\vs2017\Taiga.vcxproj /t:$build /p:Configuration=$release /p:WindowsTargetPlatformVersion=$platform }
 write-output "`n[Script] Build finished."
 
 if (!($copyBuild)) {
