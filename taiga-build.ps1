@@ -76,6 +76,9 @@ if (!($copyBuild)) {
     $copyBuild = read-host "[Script] Would you like to copy the build to your Taiga folder?"
 }
 if ($copyBuild -eq "yes" -or $copyBuild -eq "y") {
+    if (Get-Process taiga -ErrorAction SilentlyContinue) {
+        Stop-Process -Name taiga -Force
+    }
     Copy-Item $source\bin\$release\Taiga.exe -destination $install
 }
 
