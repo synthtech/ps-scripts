@@ -7,7 +7,7 @@ $Source = "$env:USERPROFILE\Documents\Git\taiga"
 # Location of Taiga installation
 $Install = "$env:APPDATA\Taiga"
 # Windows version
-$Platform = "10.0.16299.0"
+$Platform = "10.0.17134.0"
 
 $Dir = $PSScriptRoot
 
@@ -61,7 +61,7 @@ if ($Release -eq "debug") {
     nmake /f Makefile.vc mode=static RTLIBCFG=static VC=15 MACHINE=x86 DEBUG=yes
 }
 else {
-    nmake /f Makefile.vc mode=static RTLIBCFG=static MACHINE=x86 VC=15
+    nmake /f Makefile.vc mode=static RTLIBCFG=static VC=15 MACHINE=x86
 }
 Write-Output "`n[taiga-build] Build finished."
 Write-Output "[taiga-build] Copying $Release library..."
