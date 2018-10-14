@@ -2,5 +2,4 @@ $agent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, l
 
 while(!($url)) { $url = read-host "Enter the url" }
 
-if ($url -match "nicovideo.jp") { youtube-dl --user-agent $agent --netrc $url }
-else { youtube-dl --user-agent $agent $url }
+youtube-dl --user-agent $agent --netrc $url
