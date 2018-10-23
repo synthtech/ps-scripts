@@ -9,4 +9,4 @@ if ($yt -match "twitch\.tv\/.*preview(.*)\.jpg") {
 }
 write-host $yt
 
-curl.exe -A $agent -O --url $yt
+curl.exe -A $agent -# -O --url $yt
