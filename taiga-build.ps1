@@ -16,6 +16,7 @@ $QuickBuild = Read-Host "[taiga-build] Quick build?"
 if ($QuickBuild -eq "yes" -or $QuickBuild -eq "y") {
     $Release = "release"
     $Build = "build"
+    $CurlBuild = "no"
     $CopyBuild = "yes"
 }
 
@@ -34,15 +35,22 @@ if (!($Release)) {
 }
 
 if (!($Build)) {
-    $Build = Read-Host "[taiga-build] Rebuild source code? (yes|no)"
+    $Build = Read-Host "[taiga-build] Rebuild source code? (yes|no|curl)"
     if ($Build -eq "yes" -or $Build -eq "y") {
         $Build = "rebuild"
+        $CurlBuild = "no"
         Write-Output "[taiga-build] Rebuilding from source."
     } elseif ($Build -eq "no" -or $Build -eq "n") {
         $Build = "build"
+        $CurlBuild = "no"
         Write-Output "[taiga-build] Building from source."
+    } elseif ($Build -eq "curl") {
+        $Build = "rebuild"
+        $CurlBuild = "yes"
+        Write-Output "[taiga-build] Rebuilding from source including curl."
     } else {
         $Build = "build"
+        $CurlBuild = "no"
         Write-Output "[taiga-build] Defaulting to build from source."
     }
 }
@@ -52,7 +60,7 @@ Set-Location $Source\deps\src\curl\winbuild
 Invoke-BatchFile $VcVars
 Invoke-BatchFile $Source\deps\src\curl\buildconf.bat
 
-if ($Build -eq "rebuild") {
+if ($CurlBuild -eq "yes") {
     Remove-Item -Recurse -Force ..\builds
 }
 
