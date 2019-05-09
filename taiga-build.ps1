@@ -1,15 +1,30 @@
+# Find Visual Studio install path using VSSetup
+$VsPath = (Get-VSSetupInstance | Select-VSSetupInstance -Version 16.0).InstallationPath
 # Location of vcvars32.bat (for compiling libcurl)
-$VcVars = "${env:PROGRAMFILES(X86)}\Microsoft Visual Studio\2017\Community\VC\Auxiliary\Build\vcvars32.bat"
+$VcVars = "$VsPath\VC\Auxiliary\Build\vcvars32.bat"
 # Location of MsBuild (for compiling Taiga)
-$MsBuild = "${env:PROGRAMFILES(X86)}\Microsoft Visual Studio\2017\Community\MSBuild\15.0\Bin\MSBuild.exe"
+$MsBuild = "$VsPath\MSBuild\Current\Bin\MSBuild.exe"
 # Location of Taiga source code
 $Source = "$env:USERPROFILE\Documents\Git\taiga"
 # Location of Taiga installation
 $Install = "$env:APPDATA\Taiga"
-# Windows version
-$Platform = "10.0.17134.0"
 
 $Dir = $PSScriptRoot
+
+function Invoke-BatchFile {
+    param([string]$Path)
+    $Temp = [IO.Path]::GetTempFileName()
+    cmd.exe /c " `"$Path`" && set " > $Temp
+    Get-Content $Temp | ForEach-Object {
+        if ($_ -match "^(.*?)=(.*)$") {
+            [System.Environment]::SetEnvironmentVariable($matches[1], $matches[2])
+        }
+        else {
+            $_
+        }
+    }
+    Remove-Item $Temp
+}
 
 # Setup config
 $QuickBuild = Read-Host "[taiga-build] Quick build?"
@@ -61,19 +76,21 @@ Invoke-BatchFile $VcVars
 Invoke-BatchFile $Source\deps\src\curl\buildconf.bat
 
 if ($CurlBuild -eq "yes") {
-    Remove-Item -Recurse -Force ..\builds
+    if (Test-Path ..\builds) {
+        Remove-Item -Recurse -Force ..\builds
+    }
 }
 
 Write-Output "[taiga-build] Building libcurl ($Release)..."
 if ($Release -eq "debug") {
-    nmake /f Makefile.vc mode=static RTLIBCFG=static VC=15 MACHINE=x86 DEBUG=yes
+    nmake /f Makefile.vc mode=static RTLIBCFG=static VC=16 MACHINE=x86 DEBUG=yes
 }
 else {
-    nmake /f Makefile.vc mode=static RTLIBCFG=static VC=15 MACHINE=x86
+    nmake /f Makefile.vc mode=static RTLIBCFG=static VC=16 MACHINE=x86
 }
 Write-Output "`n[taiga-build] Build finished."
 Write-Output "[taiga-build] Copying $Release library..."
-robocopy /s /is ..\builds\libcurl-vc15-x86-$Release-static-ipv6-sspi-winssl\lib $Source\deps\lib
+robocopy /s /is ..\builds\libcurl-vc16-x86-$Release-static-ipv6-sspi-winssl\lib $Source\deps\lib
 Write-Output "[taiga-build] Copy complete.`n"
 
 Set-Location $Dir
@@ -81,10 +98,10 @@ Set-Location $Dir
 # Compiling Taiga
 Write-Output "[taiga-build] Building Taiga...`n"
 if ($MsBuild) {
-    & $MsBuild $Source\project\vs2017\Taiga.vcxproj /t:$Build /p:Configuration=$Release /p:WindowsTargetPlatformVersion=$Platform
+    & $MsBuild $Source\project\vs2019\Taiga.vcxproj /t:$Build /p:Configuration=$Release
 }
 else {
-    MsBuild $Source\project\vs2017\Taiga.vcxproj /t:$Build /p:Configuration=$Release /p:WindowsTargetPlatformVersion=$Platform
+    MSBuild $Source\project\vs2019\Taiga.vcxproj /t:$Build /p:Configuration=$Release
 }
 Write-Output "`n[taiga-build] Build finished."
 
@@ -100,3 +117,4 @@ if ($CopyBuild -eq "yes" -or $CopyBuild -eq "y") {
 }
 
 Read-Host -Prompt "`n[taiga-build] Press any key to exit"
+Set-Location $Dir
