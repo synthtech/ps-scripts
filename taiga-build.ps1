@@ -5,11 +5,11 @@ $VcVars = "$VsPath\VC\Auxiliary\Build\vcvars32.bat"
 # Location of MsBuild (for compiling Taiga)
 $MsBuild = "$VsPath\MSBuild\Current\Bin\MSBuild.exe"
 # Location of Taiga source code
-$Source = "$env:USERPROFILE\Documents\Git\taiga"
+$Source = "$env:USERPROFILE\Documents\GitHub\taiga"
 # Location of Taiga installation
 $Install = "$env:APPDATA\Taiga"
 
-$Dir = $PSScriptRoot
+$Dir = Get-Location
 
 function Invoke-BatchFile {
     param([string]$Path)
@@ -90,7 +90,7 @@ else {
 }
 Write-Output "`n[taiga-build] Build finished."
 Write-Output "[taiga-build] Copying $Release library..."
-robocopy /s /is ..\builds\libcurl-vc16-x86-$Release-static-ipv6-sspi-winssl\lib $Source\deps\lib
+robocopy /s /is ..\builds\libcurl-vc16-x86-$Release-static-ipv6-sspi-schannel\lib $Source\deps\lib
 Write-Output "[taiga-build] Copy complete.`n"
 
 Set-Location $Dir
